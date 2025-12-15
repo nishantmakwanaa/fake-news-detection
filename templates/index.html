@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <!-- Header Section -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">🔍</div>
+            <h1 class="title">Fake News Detector</h1>
+            <p class="subtitle">AI-Powered Truth Verification System</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Input Form Card -->
+        <div class="card form-card">
+            <h2 class="card-title">Analyze News Article</h2>
+            <form action="{{ url_for('predict') }}" method="POST" class="news-form">
+                <div class="form-group">
+                    <label for="news" class="form-label">
+                        <span class="label-icon">📰</span>
+                        Paste your news text here:
+                    </label>
+                    <textarea 
+                        name="news" 
+                        id="news"
+                        class="form-textarea" 
+                        rows="8" 
+                        placeholder="Enter the news headline or article you want to verify. The AI will analyze the text and determine if it's likely to be real or fake news..."
+                        required>{% if prediction_result and prediction_result.statement %}{{ prediction_result.statement }}{% elif request.form.news %}{{ request.form.news }}{% endif %}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-icon">🔍</span>
+                    Analyze Article
+                </button>
+            </form>
+        </div>
+
+        <!-- Prediction Result Card -->
+        {% if prediction_result %}
+        <div class="card result-card animate-in">
+            <h2 class="card-title">Analysis Result</h2>
+            {% if prediction_result.error %}
+            <div class="prediction-result">
+                <div class="result-content error-content">
+                    <span class="error-icon">❌</span>
+                    <p>{{ prediction_result.error }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="prediction-result">
+                <!-- Statement Section -->
+                <div class="result-section">
+                    <h3 class="result-section-title">📰 Statement Analyzed:</h3>
+                    <p class="statement-text">{{ prediction_result.statement }}</p>
+                </div>
+                
+                <!-- Prediction Result -->
+                <div class="result-section">
+                    <h3 class="result-section-title">🔍 Prediction Result:</h3>
+                    <div class="prediction-badge {% if prediction_result.prediction %}prediction-real{% else %}prediction-fake{% endif %}">
+                        <div class="prediction-icon">
+                            {% if prediction_result.prediction %}
+                            ✅
+                            {% else %}
+                            ⚠️
+                            {% endif %}
+                        </div>
+                        <div class="prediction-content">
+                            <span class="prediction-label">The given statement is:</span>
+                            <span class="prediction-value">{{ prediction_result.prediction_text }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Probability Scores -->
+                {% if prediction_result.real_probability is not none %}
+                <div class="result-section">
+                    <h3 class="result-section-title">📊 Probability Scores:</h3>
+                    <div class="probability-scores">
+                        <div class="probability-item">
+                            <div class="probability-header">
+                                <span class="probability-label">Real News Probability:</span>
+                                <span class="probability-value real-prob">{{ "%.4f"|format(prediction_result.real_probability) }} ({{ "%.2f"|format(prediction_result.real_probability * 100) }}%)</span>
+                            </div>
+                            <div class="probability-bar">
+                                <div class="probability-fill real-fill" style="width: {{ prediction_result.real_probability * 100 }}%"></div>
+                            </div>
+                        </div>
+                        <div class="probability-item">
+                            <div class="probability-header">
+                                <span class="probability-label">Fake News Probability:</span>
+                                <span class="probability-value fake-prob">{{ "%.4f"|format(prediction_result.fake_probability) }} ({{ "%.2f"|format(prediction_result.fake_probability * 100) }}%)</span>
+                            </div>
+                            <div class="probability-bar">
+                                <div class="probability-fill fake-fill" style="width: {{ prediction_result.fake_probability * 100 }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% if prediction_result.confidence is not none %}
+                    <div class="confidence-section">
+                        <div class="confidence-badge">
+                            <span class="confidence-label">Confidence Score:</span>
+                            <span class="confidence-value">{{ "%.2f"|format(prediction_result.confidence * 100) }}%</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            <button onclick="location.reload()" class="btn btn-secondary">
+                Analyze Another Article
+            </button>
+        </div>
+        {% endif %}
+
+        <!-- Info Section -->
+        <div class="card info-card">
+            <h2 class="card-title">About This Tool</h2>
+            <div class="info-content">
+                <div class="info-item">
+                    <div class="info-icon">🤖</div>
+                    <div class="info-text">
+                        <h3>Machine Learning Powered</h3>
+                        <p>Uses advanced NLP and TF-IDF vectorization with Logistic Regression to analyze news authenticity</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">📊</div>
+                    <div class="info-text">
+                        <h3>High Accuracy</h3>
+                        <p>Trained on thousands of verified news articles to provide reliable predictions</p>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-icon">⚡</div>
+                    <div class="info-text">
+                        <h3>Instant Analysis</h3>
+                        <p>Get results in seconds - simply paste your news text and click analyze</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>Built with Python, Flask & Machine Learning | Fake News Detection System</p>
+    </footer>
+</div>
+{% endblock %}
