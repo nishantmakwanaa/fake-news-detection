@@ -83,17 +83,42 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, 'final_model.sav')
 loaded_pipeline = None
 
-try:
+def load_model():
+    """Load the model from local file or external source if needed."""
+    global loaded_pipeline
+    
+    # Try loading from local file first
     if os.path.exists(MODEL_PATH):
-        loaded_pipeline = pickle.load(open(MODEL_PATH, 'rb'))
-        print(f"✅ Model loaded successfully from {MODEL_PATH}")
-        print(f"   Model type: {type(loaded_pipeline)}")
-    else:
-        print(f"❌ ERROR: Model file '{MODEL_PATH}' not found!")
-        print("   Please ensure final_model.sav exists in the project directory.")
-except Exception as e:
-    print(f"❌ ERROR loading model: {str(e)}")
+        try:
+            loaded_pipeline = pickle.load(open(MODEL_PATH, 'rb'))
+            print(f"✅ Model loaded successfully from {MODEL_PATH}")
+            print(f"   Model type: {type(loaded_pipeline)}")
+            return True
+        except Exception as e:
+            print(f"❌ ERROR loading model from local file: {str(e)}")
+    
+    # If local file doesn't exist, try loading from external source
+    # You can set MODEL_URL environment variable in Vercel to point to your model
+    # Example: https://github.com/yourusername/repo/releases/download/v1.0/final_model.sav
+    model_url = os.environ.get('MODEL_URL')
+    if model_url:
+        try:
+            import urllib.request
+            print(f"📥 Downloading model from external source: {model_url}")
+            urllib.request.urlretrieve(model_url, MODEL_PATH)
+            loaded_pipeline = pickle.load(open(MODEL_PATH, 'rb'))
+            print(f"✅ Model loaded successfully from external source")
+            return True
+        except Exception as e:
+            print(f"❌ ERROR loading model from external source: {str(e)}")
+    
+    print(f"❌ ERROR: Model file '{MODEL_PATH}' not found!")
+    print("   Please ensure final_model.sav exists or set MODEL_URL environment variable.")
     loaded_pipeline = None
+    return False
+
+# Load model on startup
+load_model()
 
 
 def fake_news_det(news):

@@ -1,0 +1,27 @@
+# Exclude large files and directories not needed for deployment
+archive/
+*.csv
+*.ipynb
+*.pyc
+__pycache__/
+*.log
+.git/
+.vscode/
+.idea/
+*.md
+README.md
+
+# Exclude training scripts (not needed in production)
+train_and_save_model.py
+prediction.py
+
+# Exclude documentation images (not needed for app functionality)
+images/
+
+# Keep essential files:
+# - app.py (entrypoint)
+# - front.py (Flask app)
+# - final_model.sav (model file - required, but may need external storage if too large)
+# - templates/ (HTML templates)
+# - static/ (CSS and assets)
+# - requirements.txt (dependencies)
